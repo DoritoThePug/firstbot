@@ -1,18 +1,33 @@
-const Discord = require("discord.js");
-require("dotenv").config();
+const { Client, Intents } = require("discord.js");
+const { token, clientId, guildId } = require("config.jsn");
 
-const client = new Discord.Client({
-  intents: ["GUILDS", "GUILD_MESSAGES"],
+const generateWelcomeImage = require("./generateWelcomeImage");
+
+const client = new Client({
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS],
 });
 
-client.on("ready", () => {
-  console.log(`Logged in as ${client.user.tag}`);
+client.once("ready", () => {
+  console.log(`${client.user.tag} is online!`);
 });
 
 client.on("messageCreate", (message) => {
-  if (message.content == "hi") {
-    message.reply("Hello World");
+  if (message.author.bot) return;
+
+  let args;
+
+  if (message.guild) {
   }
 });
 
-client.login(process.env.TOKEN);
+const welcomeChannelId = "927607224816250930";
+
+client.on("guildMemberAdd", async (member) => {
+  const img = await generateWelcomeImage(member);
+  member.guild.channels.cache.get(welcomeChannelId).send({
+    content: `<@${member.id}> Welcome to ${member.guild.name}`,
+    files: [img],
+  });
+});
+
+client.login(token);
