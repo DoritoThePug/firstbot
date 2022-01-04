@@ -15,10 +15,9 @@ const avatar = {
   y: 250,
 };
 
-const generateWelcomeImage = async (member) => {
-  let username = member.user.username;
-  let discriminator = member.user.discriminator;
-  let avatarUrl = member.user.displayAvatarURL({
+const generateWelcomeImage = async (user) => {
+  let tag = user.tag;
+  let avatarUrl = user.displayAvatarURL({
     format: "jpg",
     dynamic: false,
     size: avatar.size,
@@ -63,11 +62,7 @@ const generateWelcomeImage = async (member) => {
   ctx.fillText("WELCOME", avatar.x + avatar.size / 2, avatar.y - 10);
 
   ctx.font = "normal normal bold 80px roboto";
-  ctx.fillText(
-    username + "#" + discriminator,
-    avatar.x + avatar.size / 2,
-    avatar.y + 310
-  );
+  ctx.fillText(tag, avatar.x + avatar.size / 2, avatar.y + 340);
 
   const attachment = new Discord.MessageAttachment(
     canvas.toBuffer(),

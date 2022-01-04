@@ -1,33 +1,33 @@
-const { Client, Intents } = require("discord.js");
-const { token, clientId, guildId } = require("config.jsn");
-
-const generateWelcomeImage = require("./generateWelcomeImage");
+const fs = require("fs");
+const { Client, Intents, Interaction, Collection } = require("discord.js");
+const { token, clientId, guildId } = require("./config.json");
 
 const client = new Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS],
 });
 
-client.once("ready", () => {
-  console.log(`${client.user.tag} is online!`);
-});
+const eventFiles = fs
+  .readdirSync("./events")
+  .filter((file) => file.endsWith(".js"));
 
-client.on("messageCreate", (message) => {
-  if (message.author.bot) return;
+for (const file of eventFiles) {
+  const event = require(`./events/${file}`);
 
-  let args;
-
-  if (message.guild) {
+  if (event.once) {
+    client.once(event.name, (...args) => event.execute(...args));
+  } else {
+    client.on(event.name, (...args) => event.execute(...args));
   }
-});
+}
 
-const welcomeChannelId = "927607224816250930";
+client.commands = new Collection();
+const commandFiles = fs
+  .readdirSync("./commands")
+  .filter((file) => file.endsWith(".js"));
 
-client.on("guildMemberAdd", async (member) => {
-  const img = await generateWelcomeImage(member);
-  member.guild.channels.cache.get(welcomeChannelId).send({
-    content: `<@${member.id}> Welcome to ${member.guild.name}`,
-    files: [img],
-  });
-});
+for (const file of commandFiles) {
+  command = require(`./commands/${file}`);
+  client.commands.set(command.data.name, command);
+}
 
 client.login(token);
